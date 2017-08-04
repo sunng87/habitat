@@ -72,6 +72,13 @@ impl Client {
         ).map_err(Error::HabitatHttpClient)?))
     }
 
+    /// Retrieve a job.
+    ///
+    /// # Failures
+    ///
+    /// * Remote API Server is not available
+    pub fn show_job(&self, job_id: u64) -> Result<(String)> {}
+
     /// Create a job.
     ///
     /// # Failures
