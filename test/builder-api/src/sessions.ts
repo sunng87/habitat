@@ -4,7 +4,7 @@ import supertest = require('supertest');
 const request = supertest('http://localhost:9636/v1');
 const globalAny:any = global;
 
-describe('Authenticate API', function() { 
+describe('Authenticate API', function() {
   describe('Create sessions', function() {
     it('returns bobo', function(done) {
       request.get('/authenticate/bobo')

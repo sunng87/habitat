@@ -673,6 +673,10 @@ fn upload_package(req: &mut Request) -> IronResult<Response> {
         }
     };
 
+    let mut buf = Vec::new();
+    req.body.read_to_end(&mut buf);
+    debug!("******************************** BUF = {:?}", buf);
+
     // Create a temp file at the archive location
     let temp_name = format!("{}.tmp", Uuid::new_v4());
     let temp_path = parent_path.join(temp_name);

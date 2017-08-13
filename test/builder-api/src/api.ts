@@ -10,3 +10,6 @@ import "./origins";
 import "./sessions";
 
 import "./invitations";
+
+import "./channels";
+import "./packages";

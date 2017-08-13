@@ -1,6 +1,6 @@
 #!/bin/bash
 
-if [ "$I_MEAN_IT" != "1" ]; then 
+if [ "$I_MEAN_IT" != "1" ]; then
   echo "**** THESE TESTS WILL DESTROY YOUR DATABASES ****"
   echo "**** AND I MEAN THE REALLY REAL ONES ****"
   echo
@@ -11,6 +11,7 @@ fi
 sudo rm -rf /hab/svc/postgresql
 pushd ../../
 make build-srv || exit $?
+
 env HAB_FUNC_TEST=1 ./support/linux/bin/forego start -f support/Procfile -e support/bldr.env 2>&1 > ./test/builder-api/services.log &
 forego_pid=$!
 popd
