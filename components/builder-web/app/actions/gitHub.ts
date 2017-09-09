@@ -16,8 +16,9 @@ import "whatwg-fetch";
 import {URLSearchParams} from "@angular/http";
 import * as cookies from "js-cookie";
 import config from "../config";
-import {attemptSignIn, addNotification, goHome, fetchMyOrigins, requestRoute, setSigningInFlag,
+import {attemptSignIn, addNotification, goHome, requestRoute, setSigningInFlag,
     signOut} from "./index";
+import { fetchMyOrigins } from "../origin/origin.actions";
 import {setFeatureFlags} from "./users";
 import {DANGER, WARNING} from "./notifications";
 

@@ -13,11 +13,15 @@
 // limitations under the License.
 
 import { Component, OnInit } from "@angular/core";
-import { acceptOriginInvitation, fetchMyOriginInvitations, fetchMyOrigins }
-    from "../../actions/index";
+import { Router } from "@angular/router";
+
+import {
+    acceptOriginInvitation,
+    fetchMyOriginInvitations,
+    fetchMyOrigins
+} from "../origin.actions";
 import { AppStore } from "../../AppStore";
 import { requireSignIn } from "../../util";
-import { Router } from "@angular/router";
 
 @Component({
     template: require("./origins-page.component.html")

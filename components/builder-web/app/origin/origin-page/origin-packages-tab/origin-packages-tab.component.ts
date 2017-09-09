@@ -12,16 +12,39 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Component } from "@angular/core";
+import { ActivatedRoute } from "@angular/router";
+import { Component, OnInit } from "@angular/core";
 import { AppStore } from "../../../AppStore";
+import { getUniquePackages } from "../../../actions";
 
 @Component({
     selector: "hab-origin-packages-tab",
     template: require("./origin-packages-tab.component.html")
 })
 
-export class OriginPackagesTabComponent {
-  constructor(private store: AppStore) {}
+export class OriginPackagesTabComponent implements OnInit {
+  loadPackages: Function;
+
+  constructor(
+    private store: AppStore,
+  ) {}
+
+  ngOnInit() {
+    this.getPackages();
+    this.loadPackages = this.getPackages.bind(this);
+  }
+
+  getPackages() {
+    this.store.dispatch(getUniquePackages(this.origin.name, 0, this.gitHubAuthToken));
+  }
+
+  get origin() {
+    return this.store.getState().origins.current;
+  }
+
+  get gitHubAuthToken() {
+    return this.store.getState().gitHub.authToken;
+  }
 
   get packagesUi() {
     return this.store.getState().packages.ui.visible;
@@ -31,7 +54,21 @@ export class OriginPackagesTabComponent {
     return this.store.getState().packages.visible;
   }
 
+  get totalCount() {
+    return this.store.getState().packages.totalCount;
+  }
+
   get noPackages() {
     return (!this.packagesUi.exists || this.packages.size === 0) && !this.packagesUi.loading;
   }
+
+  fetchMorePackages() {
+    this.store.dispatch(getUniquePackages(
+        this.origin.name,
+        this.store.getState().packages.nextRange,
+        this.gitHubAuthToken
+    ));
+    return false;
+  }
+
 }

@@ -22,7 +22,6 @@ import { OriginPageModule } from "./origin-page/origin-page.module";
 import { OriginRoutingModule } from "./origin-routing.module";
 import { OriginsPageComponent } from "./origins-page/origins-page.component";
 import { OriginCreatePageComponent } from "./origin-create-page/origin-create-page.component";
-import { OriginService } from "./origin.service";
 
 // This is so we can test that the ordering of the modules is correct.
 // Ordering matters in this case because we have a static route 'create'
@@ -44,9 +43,6 @@ export const declarations = [
 
 @NgModule({
   imports,
-  declarations,
-  providers: [
-    OriginService
-  ]
+  declarations
 })
 export class OriginModule {}

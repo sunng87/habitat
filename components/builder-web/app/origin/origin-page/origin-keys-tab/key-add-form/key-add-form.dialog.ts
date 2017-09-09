@@ -21,7 +21,7 @@ import config from "../../../../config";
 import {
     uploadOriginPrivateKey,
     uploadOriginPublicKey
-} from "../../../../actions/index";
+} from "../../../origin.actions";
 
 @Component({
     selector: "hab-key-add-form",

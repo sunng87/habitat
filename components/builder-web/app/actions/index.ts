@@ -15,7 +15,6 @@
 import * as gitHubActions from "./gitHub";
 import * as buildActions from "./builds";
 import * as notificationActions from "./notifications";
-import * as originActions from "./origins";
 import * as packageActions from "./packages";
 import * as projectActions from "./projects";
 import * as routerActions from "./router";
@@ -47,38 +46,6 @@ export const STREAM_BUILD_LOG = buildActions.STREAM_BUILD_LOG;
 
 export const ADD_NOTIFICATION = notificationActions.ADD_NOTIFICATION;
 export const REMOVE_NOTIFICATION = notificationActions.REMOVE_NOTIFICATION;
-
-export const POPULATE_MY_ORIGINS = originActions.POPULATE_MY_ORIGINS;
-export const SET_PACKAGE_COUNT_FOR_ORIGIN = originActions.SET_PACKAGE_COUNT_FOR_ORIGIN;
-export const POPULATE_MY_ORIGIN_INVITATIONS =
-    originActions.POPULATE_MY_ORIGIN_INVITATIONS;
-export const POPULATE_ORIGIN_INVITATIONS =
-    originActions.POPULATE_ORIGIN_INVITATIONS;
-export const POPULATE_ORIGIN_MEMBERS =
-    originActions.POPULATE_ORIGIN_MEMBERS;
-export const POPULATE_ORIGIN_PUBLIC_KEYS =
-    originActions.POPULATE_ORIGIN_PUBLIC_KEYS;
-export const POPULATE_ORIGIN_INTEGRATIONS =
-    originActions.POPULATE_ORIGIN_INTEGRATIONS;
-export const SET_CURRENT_ORIGIN = originActions.SET_CURRENT_ORIGIN;
-export const SET_CURRENT_ORIGIN_CREATING_FLAG =
-    originActions.SET_CURRENT_ORIGIN_CREATING_FLAG;
-export const SET_CURRENT_ORIGIN_ADDING_PRIVATE_KEY =
-    originActions.SET_CURRENT_ORIGIN_ADDING_PRIVATE_KEY;
-export const SET_CURRENT_ORIGIN_ADDING_PUBLIC_KEY =
-    originActions.SET_CURRENT_ORIGIN_ADDING_PUBLIC_KEY;
-export const SET_CURRENT_ORIGIN_LOADING =
-    originActions.SET_CURRENT_ORIGIN_LOADING;
-export const SET_ORIGIN_PRIVATE_KEY_UPLOAD_ERROR_MESSAGE =
-    originActions.SET_ORIGIN_PRIVATE_KEY_UPLOAD_ERROR_MESSAGE;
-export const SET_ORIGIN_PUBLIC_KEY_UPLOAD_ERROR_MESSAGE =
-    originActions.SET_ORIGIN_PUBLIC_KEY_UPLOAD_ERROR_MESSAGE;
-export const SET_ORIGIN_USER_INVITE_ERROR_MESSAGE =
-    originActions.SET_ORIGIN_USER_INVITE_ERROR_MESSAGE;
-export const SET_ORIGIN_INTEGRATION_SAVE_ERROR_MESSAGE =
-    originActions.SET_ORIGIN_INTEGRATION_SAVE_ERROR_MESSAGE;
-export const TOGGLE_ORIGIN_PICKER = originActions.TOGGLE_ORIGIN_PICKER;
-export const SET_ORIGIN_PRIVACY_SETTINGS = originActions.SET_ORIGIN_PRIVACY_SETTINGS;
 
 export const CLEAR_PACKAGES = packageActions.CLEAR_PACKAGES;
 export const CLEAR_LATEST_PACKAGE = packageActions.CLEAR_LATEST_PACKAGE;
@@ -140,23 +107,6 @@ export const submitJob = buildActions.submitJob;
 
 export const addNotification = notificationActions.addNotification;
 export const removeNotification = notificationActions.removeNotification;
-
-export const acceptOriginInvitation = originActions.acceptOriginInvitation;
-export const createOrigin = originActions.createOrigin;
-export const fetchOrigin = originActions.fetchOrigin;
-export const fetchOriginInvitations = originActions.fetchOriginInvitations;
-export const fetchOriginMembers = originActions.fetchOriginMembers;
-export const fetchOriginPublicKeys = originActions.fetchOriginPublicKeys;
-export const fetchMyOrigins = originActions.fetchMyOrigins;
-export const fetchMyOriginInvitations = originActions.fetchMyOriginInvitations;
-export const inviteUserToOrigin = originActions.inviteUserToOrigin;
-export const toggleOriginPicker = originActions.toggleOriginPicker;
-export const setCurrentOrigin = originActions.setCurrentOrigin;
-export const uploadOriginPrivateKey = originActions.uploadOriginPrivateKey;
-export const uploadOriginPublicKey = originActions.uploadOriginPublicKey;
-export const setOriginPrivacySettings = originActions.setOriginPrivacySettings;
-export const addDockerHubCredentials = originActions.addDockerHubCredentials;
-export const fetchIntegrations = originActions.fetchIntegrations;
 
 export const fetchDashboardRecent = packageActions.fetchDashboardRecent;
 export const fetchExplore = packageActions.fetchExplore;

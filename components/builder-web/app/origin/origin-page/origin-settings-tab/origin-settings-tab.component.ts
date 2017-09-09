@@ -14,7 +14,7 @@
 
 import { Component } from "@angular/core";
 import { AppStore } from "../../../AppStore";
-import { setOriginPrivacySettings } from "../../../actions/index";
+import { setOriginPrivacySettings } from "../../origin.actions";
 import { MdDialog, MdDialogRef } from "@angular/material";
 import { DockerCredentialsFormDialog } from "../docker-credentials-form/docker-credentials-form.dialog";
 @Component({

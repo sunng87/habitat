@@ -12,12 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Component, Input, OnInit, OnDestroy } from "@angular/core";
+import { Component, Input, OnInit } from "@angular/core";
 import { FormControl, FormGroup, FormBuilder, Validators } from "@angular/forms";
 import { List } from "immutable";
 import config from "../../../config";
 import { AppStore } from "../../../AppStore";
-import { inviteUserToOrigin } from "../../../actions/index";
+import {
+    inviteUserToOrigin,
+    fetchOriginMembers,
+    fetchOriginInvitations
+} from "../../origin.actions";
 import { ActivatedRoute } from "@angular/router";
 import { Subscription } from "rxjs/Subscription";
 import { OriginRecord } from "../../../records/origin-record";
@@ -27,11 +31,9 @@ import { OriginRecord } from "../../../records/origin-record";
     template: require("./origin-members-tab.component.html")
 })
 
-export class OriginMembersTabComponent implements OnInit, OnDestroy {
+export class OriginMembersTabComponent implements OnInit {
     form: FormGroup;
     control: FormControl;
-    sub: Subscription;
-    origin;
 
     constructor(private route: ActivatedRoute, formBuilder: FormBuilder, private store: AppStore) {
         this.form = formBuilder.group({});
@@ -42,15 +44,18 @@ export class OriginMembersTabComponent implements OnInit, OnDestroy {
     }
 
     public ngOnInit() {
-        this.sub = this.route.parent.params.subscribe(params => {
-            this.origin = OriginRecord({ name: params["origin"]});
-        });
+        this.store.dispatch(fetchOriginMembers(
+            this.origin.name, this.gitHubAuthToken
+        ));
+        this.store.dispatch(fetchOriginInvitations(
+            this.origin.name, this.gitHubAuthToken
+        ));
         this.control = new FormControl("", Validators.required);
         this.form.addControl("username", this.control);
     }
 
-    ngOnDestroy() {
-        this.sub.unsubscribe();
+    get origin() {
+        return this.store.getState().origin.current;
     }
 
     get ui() {

@@ -16,14 +16,7 @@ import { Component, OnInit, OnDestroy } from "@angular/core";
 import { RouterLink, ActivatedRoute } from "@angular/router";
 import { Subscription } from "rxjs/Subscription";
 import { AppStore } from "../../AppStore";
-import { FeatureFlags } from "../../Privilege";
-import { fetchOrigin, fetchOriginInvitations, fetchOriginMembers,
-        inviteUserToOrigin,
-        filterPackagesBy, fetchMyOrigins,
-        setProjectHint, requestRoute, setCurrentProject, getUniquePackages, fetchIntegrations
-} from "../../actions";
-import config from "../../config";
-import { OriginRecord } from "../../records/origin-record";
+import { fetchOrigin, fetchMyOrigins } from "../origin.actions";
 import { requireSignIn, packageString } from "../../util";
 
 export enum ProjectStatus {
@@ -37,33 +30,18 @@ export enum ProjectStatus {
 })
 
 export class OriginPageComponent implements OnInit, OnDestroy {
-    loadPackages: Function;
-    perPage: number = 50;
     projectStatus = ProjectStatus;
     sub: Subscription;
-    origin;
 
-    constructor(private route: ActivatedRoute, private store: AppStore) {
-        this.sub = this.route.params.subscribe(params => {
-            this.origin = OriginRecord({ name: params["origin"]});
-        });
-    }
+    constructor(private route: ActivatedRoute, private store: AppStore) {}
 
     ngOnInit() {
         requireSignIn(this);
-        this.store.dispatch(fetchOrigin(this.origin.name));
-        this.store.dispatch(fetchMyOrigins(this.gitHubAuthToken));
-        this.store.dispatch(fetchOriginMembers(
-            this.origin.name, this.gitHubAuthToken
-        ));
-        this.store.dispatch(fetchOriginInvitations(
-            this.origin.name, this.gitHubAuthToken
-        ));
-        this.getPackages();
-        this.loadPackages = this.getPackages.bind(this);
-        this.store.dispatch(fetchIntegrations(
-            this.origin.name, this.gitHubAuthToken
-        ));
+        // This will ensure the origin is set in the state for all of our child routes
+        this.sub = this.route.parent.params.subscribe(params => {
+            this.store.dispatch(fetchOrigin(params["origin"]));
+            this.store.dispatch(fetchMyOrigins(this.gitHubAuthToken));
+        });
     }
 
     ngOnDestroy() {
@@ -71,16 +49,8 @@ export class OriginPageComponent implements OnInit, OnDestroy {
     }
 
     get navLinks() {
-        // ED TODO: Uncomment settings when the privacy api endpoint is implemented
+        // TED TODO: Uncomment settings when the privacy api endpoint is implemented
         return ["packages", "keys", "members", "integrations"/*, "settings"*/];
-    }
-
-    get features() {
-        return this.store.getState().users.current.flags;
-    }
-
-    get docsUrl() {
-        return config["docs_url"];
     }
 
     get gitHubAuthToken() {
@@ -91,69 +61,7 @@ export class OriginPageComponent implements OnInit, OnDestroy {
         return this.store.getState().origins.ui.current;
     }
 
-    get totalCount() {
-        return this.store.getState().packages.totalCount;
-    }
-
     get myOrigins() {
         return this.store.getState().origins.mine;
-    }
-
-    get iAmPartOfThisOrigin() {
-        return !!this.myOrigins.find(org => {
-            return org["name"] === this.origin.name;
-        });
-    }
-
-    linkToRepo(p): boolean {
-        this.store.dispatch(setProjectHint({
-            originName: p.origin,
-            packageName: p.name
-        }));
-        this.store.dispatch(requestRoute(["/projects", "create"]));
-        return false;
-    }
-
-    projectSettings(p): boolean {
-        this.store.dispatch(setProjectHint({
-            originName: p.origin,
-            packageName: p.name
-        }));
-        this.store.dispatch(setCurrentProject(this.projectForPackage(p)));
-        this.store.dispatch(requestRoute(["/projects", p.origin, p.name, "settings"]));
-        return false;
-    }
-
-    projectForPackage(p) {
-        let proj = this.store.getState().projects.added.find(proj => {
-            return proj["id"] === this.projectId(p);
-        });
-
-        if (proj) {
-            if (proj["vcs"] && proj["vcs"]["url"]) {
-                return ProjectStatus.Settings;
-            } else {
-                return ProjectStatus.Lacking;
-            }
-        } else {
-            return ProjectStatus.Connect;
-        }
-    }
-
-    getPackages() {
-        this.store.dispatch(getUniquePackages(this.origin.name, 0, this.gitHubAuthToken));
-    }
-
-    fetchMorePackages() {
-        this.store.dispatch(getUniquePackages(
-            this.origin.name,
-            this.store.getState().packages.nextRange,
-            this.gitHubAuthToken
-        ));
-        return false;
-    }
-
-    private projectId(p) {
-        return `${p["origin"]}/${p["name"]}`;
     }
 }

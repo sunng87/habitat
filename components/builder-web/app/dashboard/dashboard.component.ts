@@ -2,7 +2,8 @@ import { Component, OnInit } from "@angular/core";
 import * as cookies from "js-cookie";
 import { AppStore } from "../AppStore";
 import { Router } from "@angular/router";
-import { fetchMyOrigins, fetchDashboardRecent } from "../actions";
+import { fetchDashboardRecent } from "../actions";
+import { fetchMyOrigins } from "../origin/origin.actions";
 import { releaseToDate } from "../util";
 import config from "../config";
 

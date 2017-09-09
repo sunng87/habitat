@@ -12,46 +12,33 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Component, Input, OnInit, OnDestroy } from "@angular/core";
+import { Component, Input, OnInit } from "@angular/core";
 import { MdDialog } from "@angular/material";
-import { RouterLink, ActivatedRoute } from "@angular/router";
+import { RouterLink } from "@angular/router";
 import { List } from "immutable";
 import { Subscription } from "rxjs/Subscription";
 import { KeyAddFormDialog } from "./key-add-form/key-add-form.dialog";
 import { AppStore } from "../../../AppStore";
 import { OriginRecord } from "../../../records/origin-record";
 import config from "../../../config";
-import { fetchOriginPublicKeys } from "../../../actions/index";
-import { OriginService } from "../../origin.service";
+import { fetchOriginPublicKeys } from "../../origin.actions";
 
 @Component({
     selector: "hab-origin-keys-tab",
     template: require("./origin-keys-tab.component.html")
 })
 
-export class OriginKeysTabComponent implements OnInit, OnDestroy {
-
-    origin;
-    sub: Subscription;
-
-    constructor(
-        private route: ActivatedRoute,
-        private store: AppStore,
-        private dialog: MdDialog,
-        private originService: OriginService
-    ) {}
+export class OriginKeysTabComponent implements OnInit {
+    constructor(private store: AppStore, private dialog: MdDialog) {}
 
     ngOnInit() {
-        this.sub = this.route.parent.params.subscribe(params => {
-            this.origin = this.originService.origin(params["origin"], this.store.getState().origins.current);
-        });
         this.store.dispatch(fetchOriginPublicKeys(
             this.origin.name, this.gitHubAuthToken
         ));
     }
 
-    ngOnDestroy() {
-        this.sub.unsubscribe();
+    get origin() {
+        return this.store.getState().origin.current;
     }
 
     get ui() {

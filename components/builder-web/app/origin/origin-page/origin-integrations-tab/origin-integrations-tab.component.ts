@@ -12,21 +12,37 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Component } from "@angular/core";
-import { AppStore } from "../../../AppStore";
-import { setOriginPrivacySettings } from "../../../actions";
+import { Component, OnInit, OnDestroy } from "@angular/core";
 import { MdDialog, MdDialogRef } from "@angular/material";
+import { AppStore } from "../../../AppStore";
+import { setOriginPrivacySettings, fetchIntegrations } from "../../origin.actions";
 import { DockerCredentialsFormDialog } from "../docker-credentials-form/docker-credentials-form.dialog";
+
 @Component({
     selector: "hab-origin-settings-tab",
     template: require("./origin-integrations-tab.component.html")
 })
 
-export class OriginIntegrationsTabComponent {
+export class OriginIntegrationsTabComponent implements OnInit {
+
   constructor(private store: AppStore, private dialog: MdDialog) {}
 
+  ngOnInit() {
+    this.store.dispatch(fetchIntegrations(
+      this.origin.name, this.gitHubAuthToken
+    ));
+  }
+
+  get origin() {
+    return this.store.getState().origin.current;
+  }
+
   get originPrivacy() {
-    return this.store.getState().origins.current.privacy;
+    return this.origin.privacy;
+  }
+
+  get gitHubAuthToken() {
+    return this.store.getState().gitHub.authToken;
   }
 
   updatePrivacy(event) {

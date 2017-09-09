@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {addNotification, SUCCESS, DANGER} from "./notifications";
-import {requestRoute} from "./router";
+import {addNotification, SUCCESS, DANGER} from "../actions/notifications";
+import {requestRoute} from "../actions/router";
 import * as depotApi from "../depotApi";
 import {BuilderApiClient} from "../BuilderApiClient";
 import {parseKey} from "../util";

@@ -12,10 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {List} from "immutable";
-import * as actionTypes from "../actions/index";
+import { List } from "immutable";
+import * as actionTypes from "./origin.actions";
 import initialState from "../initialState";
-import {OriginRecord} from "../records/origin-record";
+import { OriginRecord } from "../records/origin-record";
 
 export default function origins(state = initialState["origins"], action) {
     switch (action.type) {
