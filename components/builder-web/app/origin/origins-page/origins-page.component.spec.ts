@@ -9,7 +9,8 @@ import { MockComponent } from "ng2-mock-component";
 import { AppStore } from "../../AppStore";
 import { OriginRecord } from "../../records/origin-record";
 import { OriginsPageComponent } from "./origins-page.component";
-import * as actions from "../../actions";
+import * as actions from "./origins-page.actions";
+import * as originActions from "../origin.actions";
 
 class MockAppStore {
 
@@ -45,7 +46,7 @@ describe("OriginsPageComponent", () => {
     store = new MockAppStore();
     spyOn(store, "dispatch");
     spyOn(actions, "fetchMyOriginInvitations");
-    spyOn(actions, "fetchMyOrigins");
+    spyOn(originActions, "fetchMyOrigins");
 
     TestBed.configureTestingModule({
       imports: [
@@ -69,7 +70,7 @@ describe("OriginsPageComponent", () => {
     it("fetches the list of origins", () => {
       fixture.detectChanges();
       expect(store.dispatch).toHaveBeenCalled();
-      expect(actions.fetchMyOrigins).toHaveBeenCalledWith("token");
+      expect(originActions.fetchMyOrigins).toHaveBeenCalledWith("token");
       expect(component.origins.size).toEqual(1);
     });
 

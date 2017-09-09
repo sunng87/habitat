@@ -52,6 +52,7 @@ export const declarations = [
   OriginMembersTabComponent,
   OriginKeysTabComponent,
   OriginSettingsTabComponent,
+  OriginIntegrationsTabComponent,
   DockerCredentialsFormDialog
 ];
 
