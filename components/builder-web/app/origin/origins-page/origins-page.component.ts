@@ -15,11 +15,11 @@
 import { Component, OnInit } from "@angular/core";
 import { Router } from "@angular/router";
 
+import { fetchMyOrigins } from "../origin.actions";
 import {
     acceptOriginInvitation,
-    fetchMyOriginInvitations,
-    fetchMyOrigins
-} from "../origin.actions";
+    fetchMyOriginInvitations
+} from "./origins-page.actions";
 import { AppStore } from "../../AppStore";
 import { requireSignIn } from "../../util";
 

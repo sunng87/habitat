@@ -15,7 +15,7 @@
 import { Component, OnInit, OnDestroy } from "@angular/core";
 import { MdDialog, MdDialogRef } from "@angular/material";
 import { AppStore } from "../../../AppStore";
-import { setOriginPrivacySettings, fetchIntegrations } from "../../origin.actions";
+import { fetchIntegrations } from "./origin-integrations-tab.actions";
 import { DockerCredentialsFormDialog } from "../docker-credentials-form/docker-credentials-form.dialog";
 
 @Component({
@@ -43,10 +43,6 @@ export class OriginIntegrationsTabComponent implements OnInit {
 
   get gitHubAuthToken() {
     return this.store.getState().gitHub.authToken;
-  }
-
-  updatePrivacy(event) {
-    this.store.dispatch(setOriginPrivacySettings(event.value));
   }
 
   get integrations() {

@@ -16,6 +16,20 @@ import { List } from "immutable";
 import * as actionTypes from "./origin.actions";
 import initialState from "../initialState";
 import { OriginRecord } from "../records/origin-record";
+import {
+    POPULATE_ORIGIN_MEMBERS,
+    SET_ORIGIN_USER_INVITE_ERROR_MESSAGE
+} from "./origin-page/origin-members-tab/origin-members-tab.actions";
+import {
+    POPULATE_ORIGIN_INTEGRATIONS
+} from "./origin-page/origin-integrations-tab/origin-integrations-tab.actions";
+import {
+    POPULATE_ORIGIN_PUBLIC_KEYS,
+    SET_ORIGIN_PRIVATE_KEY_UPLOAD_ERROR_MESSAGE,
+    SET_ORIGIN_PUBLIC_KEY_UPLOAD_ERROR_MESSAGE
+} from "./origin-page/origin-keys-tab/origin-keys-tab.actions";
+import { SET_CURRENT_ORIGIN_CREATING_FLAG } from "./origin-create-page/origin-create-page.actions";
+import { POPULATE_MY_ORIGIN_INVITATIONS } from "./origins-page/origins-page.actions";
 
 export default function origins(state = initialState["origins"], action) {
     switch (action.type) {
@@ -44,7 +58,7 @@ export default function origins(state = initialState["origins"], action) {
             }
 
 
-        case actionTypes.POPULATE_MY_ORIGIN_INVITATIONS:
+        case POPULATE_MY_ORIGIN_INVITATIONS:
             return state.setIn(["myInvitations"],
                 List(action.payload));
 
@@ -52,15 +66,15 @@ export default function origins(state = initialState["origins"], action) {
             return state.setIn(["currentPendingInvitations"],
                 List(action.payload));
 
-        case actionTypes.POPULATE_ORIGIN_MEMBERS:
+        case POPULATE_ORIGIN_MEMBERS:
             return state.setIn(["currentMembers"],
                 List(action.payload));
 
-        case actionTypes.POPULATE_ORIGIN_INTEGRATIONS:
+        case POPULATE_ORIGIN_INTEGRATIONS:
             return state.setIn(["currentIntegrations"],
                 List(action.payload));
 
-        case actionTypes.POPULATE_ORIGIN_PUBLIC_KEYS:
+        case POPULATE_ORIGIN_PUBLIC_KEYS:
             if (action.error) {
                 return state.setIn(
                     ["ui", "current", "publicKeyListErrorMessage"],
@@ -87,7 +101,7 @@ export default function origins(state = initialState["origins"], action) {
                     setIn(["ui", "current", "exists"], true).
                     setIn(["ui", "current", "loading"], false);
             }
-        case actionTypes.SET_CURRENT_ORIGIN_CREATING_FLAG:
+        case SET_CURRENT_ORIGIN_CREATING_FLAG:
             return state.setIn(["ui", "current", "creating"], action.payload);
 
         case actionTypes.SET_CURRENT_ORIGIN_ADDING_PRIVATE_KEY:
@@ -102,11 +116,11 @@ export default function origins(state = initialState["origins"], action) {
             return state.setIn(["ui", "current", "loading"],
                 action.payload);
 
-        case actionTypes.SET_ORIGIN_PRIVATE_KEY_UPLOAD_ERROR_MESSAGE:
+        case SET_ORIGIN_PRIVATE_KEY_UPLOAD_ERROR_MESSAGE:
             return state.setIn(["ui", "current", "privateKeyErrorMessage"],
                 action.payload);
 
-        case actionTypes.SET_ORIGIN_PUBLIC_KEY_UPLOAD_ERROR_MESSAGE:
+        case SET_ORIGIN_PUBLIC_KEY_UPLOAD_ERROR_MESSAGE:
             return state.setIn(["ui", "current", "publicKeyErrorMessage"],
                 action.payload);
 
@@ -114,7 +128,7 @@ export default function origins(state = initialState["origins"], action) {
             return state.setIn(["ui", "current", "integrationsSaveErrorMessage"],
                 action.payload);
 
-        case actionTypes.SET_ORIGIN_USER_INVITE_ERROR_MESSAGE:
+        case SET_ORIGIN_USER_INVITE_ERROR_MESSAGE:
             return state.setIn(["ui", "current", "userInviteErrorMessage"],
                 action.payload);
 

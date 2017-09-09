@@ -19,9 +19,8 @@ import { List } from "immutable";
 import { Subscription } from "rxjs/Subscription";
 import { KeyAddFormDialog } from "./key-add-form/key-add-form.dialog";
 import { AppStore } from "../../../AppStore";
-import { OriginRecord } from "../../../records/origin-record";
 import config from "../../../config";
-import { fetchOriginPublicKeys } from "../../origin.actions";
+import { fetchOriginPublicKeys } from "./origin-keys-tab.actions";
 
 @Component({
     selector: "hab-origin-keys-tab",

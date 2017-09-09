@@ -214,6 +214,22 @@ export class BuilderApiClient {
         });
     }
 
+    public getOriginInvitations(originName: string) {
+        return new Promise((resolve, reject) => {
+            fetch(`${this.urlPrefix}/depot/origins/${originName}/invitations`, {
+                headers: this.headers,
+            }).then(response => {
+                if (response.ok) {
+                    response.json().then(data => {
+                        resolve(data["invitations"]);
+                    });
+                } else {
+                    reject(new Error(response.statusText));
+                }
+            }).catch(error => reject(error));
+        });
+    }
+
     public getMyOrigins() {
         return new Promise((resolve, reject) => {
             fetch(`${this.urlPrefix}/user/origins`, {
@@ -237,22 +253,6 @@ export class BuilderApiClient {
             }).then(response => {
                 if (response.ok) {
                     resolve(response.json());
-                } else {
-                    reject(new Error(response.statusText));
-                }
-            }).catch(error => reject(error));
-        });
-    }
-
-    public getOriginInvitations(originName: string) {
-        return new Promise((resolve, reject) => {
-            fetch(`${this.urlPrefix}/depot/origins/${originName}/invitations`, {
-                headers: this.headers,
-            }).then(response => {
-                if (response.ok) {
-                    response.json().then(data => {
-                        resolve(data["invitations"]);
-                    });
                 } else {
                     reject(new Error(response.statusText));
                 }

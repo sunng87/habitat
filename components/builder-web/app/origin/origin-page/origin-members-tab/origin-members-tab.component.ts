@@ -17,11 +17,8 @@ import { FormControl, FormGroup, FormBuilder, Validators } from "@angular/forms"
 import { List } from "immutable";
 import config from "../../../config";
 import { AppStore } from "../../../AppStore";
-import {
-    inviteUserToOrigin,
-    fetchOriginMembers,
-    fetchOriginInvitations
-} from "../../origin.actions";
+import { fetchOriginInvitations } from "../../origin.actions";
+import { fetchOriginMembers, inviteUserToOrigin } from "./origin-members-tab.actions";
 import { ActivatedRoute } from "@angular/router";
 import { Subscription } from "rxjs/Subscription";
 import { OriginRecord } from "../../../records/origin-record";

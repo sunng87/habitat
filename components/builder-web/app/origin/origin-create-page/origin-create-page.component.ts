@@ -17,7 +17,7 @@ import { FormControl, FormGroup, FormBuilder, Validators } from "@angular/forms"
 import { AppStore } from "../../AppStore";
 import { AsyncValidator } from "../../AsyncValidator";
 import { BuilderApiClient } from "../../BuilderApiClient";
-import { createOrigin } from "../origin.actions";
+import { createOrigin } from "./origin-create-page.actions";
 import { requireSignIn } from "../../util";
 
 @Component({
