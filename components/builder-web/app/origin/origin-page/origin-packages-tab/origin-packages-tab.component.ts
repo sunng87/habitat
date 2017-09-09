@@ -13,29 +13,46 @@
 // limitations under the License.
 
 import { ActivatedRoute } from "@angular/router";
-import { Component, OnInit } from "@angular/core";
+import { Component, OnInit, OnDestroy } from "@angular/core";
+import { Router } from "@angular/router";
 import { AppStore } from "../../../AppStore";
 import { getUniquePackages } from "../../../actions";
+import { Subscription } from "rxjs";
+import { fetchOrigin } from "../../origin.actions";
 
 @Component({
     selector: "hab-origin-packages-tab",
     template: require("./origin-packages-tab.component.html")
 })
 
-export class OriginPackagesTabComponent implements OnInit {
+export class OriginPackagesTabComponent implements OnInit, OnDestroy {
   loadPackages: Function;
+  sub: Subscription;
 
   constructor(
     private store: AppStore,
+    private router: Router,
+    private route: ActivatedRoute
   ) {}
 
   ngOnInit() {
-    this.getPackages();
-    this.loadPackages = this.getPackages.bind(this);
+    this.sub = this.route.parent.params.subscribe(params => {
+      this.store.dispatch(fetchOrigin(params["origin"]));
+      this.getPackages();
+      this.loadPackages = this.getPackages.bind(this);
+    });
+  }
+
+  ngOnDestroy() {
+    this.sub.unsubscribe();
   }
 
   getPackages() {
     this.store.dispatch(getUniquePackages(this.origin.name, 0, this.gitHubAuthToken));
+  }
+
+  routeToPackage(pkg) {
+    this.router.navigate(["/pkgs", pkg.origin, pkg.name]);
   }
 
   get origin() {

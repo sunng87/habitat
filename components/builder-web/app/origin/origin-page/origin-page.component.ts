@@ -32,13 +32,12 @@ export enum ProjectStatus {
 export class OriginPageComponent implements OnInit, OnDestroy {
     projectStatus = ProjectStatus;
     sub: Subscription;
-
     constructor(private route: ActivatedRoute, private store: AppStore) {}
 
     ngOnInit() {
         requireSignIn(this);
         // This will ensure the origin is set in the state for all of our child routes
-        this.sub = this.route.parent.params.subscribe(params => {
+        this.sub = this.route.params.subscribe(params => {
             this.store.dispatch(fetchOrigin(params["origin"]));
             this.store.dispatch(fetchMyOrigins(this.gitHubAuthToken));
         });
@@ -55,6 +54,10 @@ export class OriginPageComponent implements OnInit, OnDestroy {
 
     get gitHubAuthToken() {
         return this.store.getState().gitHub.authToken;
+    }
+
+    get origin() {
+        return this.store.getState().origins.current;
     }
 
     get ui() {

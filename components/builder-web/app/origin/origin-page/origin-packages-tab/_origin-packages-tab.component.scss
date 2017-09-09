@@ -1,15 +1,15 @@
-.hab-origins-list {
+.hab-packagess-list {
   
-  ul.origins {
+  ul.packages {
 
     li {
 
-      &.heading, &.origin {
+      &.heading, &.package {
         @include row;
         border-bottom: 1px solid $very-light-gray;
 
-        h3, .origin-name, .origin-pkg-count{
-          @include span-columns(5);
+        h3, .package-name{
+          @include span-columns(12);
         }
       }
 
@@ -19,11 +19,11 @@
         h3 {
           padding: 0;
           font-size: rem(12px);
-          font-family: "Montserrat Alternates";
+          font-family: $heading-font-family;
         }
       }
 
-      &.origin {
+      &.package {
         cursor: pointer;
         font-size: rem(14px);
 
@@ -32,18 +32,8 @@
           padding: 15px 10px;
           position: relative;
 
-          .origin-name {
+          .package-name {
             font-weight: 600;
-          }
-        }
-  
-        &.heading {
-          padding: 0 10px;
-  
-          h3 {
-            padding: 0;
-            font-size: rem(12px);
-            font-family: $heading-font-family;
           }
 
           hab-icon[symbol="chevron-right"] {
