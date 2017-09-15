@@ -26,7 +26,7 @@ impl Routable for SessionCreate {
     type H = String;
 
     fn route_key(&self) -> Option<Self::H> {
-        Some(String::from(self.get_name()))
+        Some(String::from(self.get_token()))
     }
 }
 
@@ -34,7 +34,7 @@ impl Routable for SessionGet {
     type H = String;
 
     fn route_key(&self) -> Option<Self::H> {
-        Some(String::from(self.get_name()))
+        Some(String::from(self.get_token()))
     }
 }
 

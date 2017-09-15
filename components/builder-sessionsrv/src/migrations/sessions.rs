@@ -79,5 +79,23 @@ pub fn migrate(migrator: &mut Migrator) -> SrvResult<()> {
                      END
                  $$ LANGUAGE plpgsql VOLATILE"#)?;
 
+    // accountsrv is wrong - it should be sessionsrv, but whatever. better to be consistent.
+    migrator.migrate("accountsrv",
+                    r#"CREATE OR REPLACE FUNCTION get_account_session_v2 (
+                        account_token text
+                        ) RETURNS TABLE(id bigint, email text, name text, token text, is_admin bool, is_early_access bool, is_build_worker bool)
+                        LANGUAGE SQL
+                        STABLE AS $$
+                            WITH cleanup AS (
+                                DELETE
+                                FROM account_sessions
+                                WHERE token = account_token
+                                AND expires_at < now()
+                            )
+                            SELECT a.id, a.email, a.name, acs.token, acs.is_admin, acs.is_early_access, acs.is_build_worker
+                            FROM accounts a INNER JOIN account_sessions acs ON a.id = acs.account_id
+                            WHERE acs.token = account_token
+                            AND expires_at > now();
+                        $$"#)?;
     Ok(())
 }

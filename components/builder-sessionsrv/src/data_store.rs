@@ -76,7 +76,7 @@ impl DataStore {
     ) -> SrvResult<sessionsrv::Session> {
         let conn = self.pool.get(session_create)?;
         let rows = conn.query(
-            "SELECT * FROM select_or_insert_account_v1($1, $2)",
+            "SELECT * FROM select_or_insert_account_v2($1, $2)",
             &[&session_create.get_name(), &session_create.get_email()],
         ).map_err(SrvError::AccountCreate)?;
         let row = rows.get(0);
@@ -157,10 +157,11 @@ impl DataStore {
     ) -> SrvResult<Option<sessionsrv::Session>> {
         let conn = self.pool.get(session_get)?;
         let rows = conn.query(
-            "SELECT * FROM get_account_session_v1($1, $2)",
-            &[&session_get.get_name(), &session_get.get_token()],
+            "SELECT * FROM get_account_session_v2($1)",
+            &[&session_get.get_token()],
         ).map_err(SrvError::SessionGet)?;
-        if rows.len() != 0 {
+
+        if rows.len() > 0 {
             let row = rows.get(0);
             let mut session = sessionsrv::Session::new();
             let id: i64 = row.get("id");

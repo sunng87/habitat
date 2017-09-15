@@ -48,7 +48,6 @@ pub fn migrate(migrator: &mut Migrator) -> SrvResult<()> {
                         RETURN;
                      END
                  $$ LANGUAGE plpgsql VOLATILE"#)?;
-
     migrator.migrate(
         "accountsrv",
         r#"CREATE OR REPLACE FUNCTION get_account_by_name_v1 (
@@ -60,7 +59,6 @@ pub fn migrate(migrator: &mut Migrator) -> SrvResult<()> {
                      END
                  $$ LANGUAGE plpgsql STABLE"#,
     )?;
-
     migrator.migrate(
         "accountsrv",
         r#"CREATE OR REPLACE FUNCTION get_account_by_id_v1 (
@@ -106,5 +104,70 @@ pub fn migrate(migrator: &mut Migrator) -> SrvResult<()> {
                      END
                  $$ LANGUAGE plpgsql STABLE"#,
     )?;
+
+    // Right, so what's going on with this massive and seemingly overcomplicated function? This
+    // function was introduced as part of a change that switched the routing key for sessions from
+    // account name (which was never used) to account token (which was the only thing we ever used
+    // to identify a session). Previous to this change, every session hashed to shard 37, which is
+    // what the empty string "" (account name) hashes to. Now, sessions will hash to different
+    // shards based then they did before. As a result, accounts that have already been created an
+    // have existed for awhile will get directed to a new shard. This will break many things, such
+    // as the origin_members table in originsrv, which maps accounts to origins. This function
+    // attempts to rectify this problem.
+    //
+    // As before, first we check to see if an account already exists in our current shard. If so,
+    // terrific - we just return it. That behavior is unchanged. If it's not found, then we loop
+    // through every shard, and for each one, we perform the same check as before. If we find an
+    // account, then we grab the info for it and insert it into our current shard. That way, we can
+    // preserve people's current info, namely account id. If we never find it on any shard, then it
+    // must be a brand new account and we create it like normal.
+    migrator.migrate("accountsrv",
+                 r#"CREATE OR REPLACE FUNCTION select_or_insert_account_v2 (
+                    account_name text,
+                    account_email text
+                 ) RETURNS SETOF accounts AS $$
+                     DECLARE
+                        existing_account RECORD;
+                        schema RECORD;
+                        q TEXT;
+                        n integer;
+                     BEGIN
+                        SELECT * INTO existing_account FROM accounts WHERE name = account_name LIMIT 1;
+                        IF FOUND THEN
+                            RAISE NOTICE 'Found an existing account on the first try - %', existing_account;
+                            RETURN NEXT existing_account;
+                        ELSE
+                            FOR schema IN EXECUTE
+                                format(
+                                  'SELECT schema_name FROM information_schema.schemata WHERE left(schema_name, 6) = %L',
+                                  'shard_'
+                                )
+                            LOOP
+                                RAISE NOTICE 'Checking % for an account that matches %', schema.schema_name, account_name;
+                                q := format('SELECT * FROM %I.accounts WHERE name = %L LIMIT 1', schema.schema_name, account_name);
+                                RAISE NOTICE 'Query = %', q;
+                                EXECUTE q INTO existing_account;
+                                GET DIAGNOSTICS n = ROW_COUNT;
+                                RAISE NOTICE 'Rows = %', n;
+                                IF n = 1 THEN
+                                    RAISE NOTICE 'Found an existing account on % - %', schema.schema_name, existing_account;
+                                    q := format('INSERT INTO accounts (id, name, email) VALUES (%L, %L, %L) ON CONFLICT DO NOTHING RETURNING *', existing_account.id, existing_account.name, existing_account.email);
+                                    RAISE NOTICE 'Insert query = %', q;
+                                    EXECUTE q INTO existing_account;
+                                    RETURN NEXT existing_account;
+                                    EXIT;
+                                ELSE
+                                    RAISE NOTICE 'NOT FOUND on %', schema.schema_name;
+                                END IF;
+                            END LOOP;
+
+                            IF n = 0 THEN
+                              RAISE NOTICE 'Looped through all the schemas and did not find any accounts matching %. Creating a brand new one.', account_name;
+                              RETURN QUERY INSERT INTO accounts (name, email) VALUES (account_name, account_email) ON CONFLICT DO NOTHING RETURNING *;
+                            END IF;
+                        END IF;
+                        RETURN;
+                     END
+                 $$ LANGUAGE plpgsql VOLATILE"#)?;
     Ok(())
 }
