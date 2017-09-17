@@ -19,6 +19,7 @@ import {Router, RouterOutlet} from "@angular/router";
 import {authenticateWithGitHub, loadSessionState, removeNotification,
     requestGitHubAuthToken, routeChange, setGitHubAuthState,
     setPackagesSearchQuery, signOut, toggleUserNavMenu, loadFeatureFlags} from "./actions/index";
+import { AuthService } from "./auth.service";
 
 @Component({
     selector: "hab-app",
@@ -54,7 +55,11 @@ export class AppComponent implements OnInit, OnDestroy {
 
     private sub: Subscription;
 
-    constructor(private router: Router, private store: AppStore) {
+    constructor(
+        private router: Router,
+        private store: AppStore,
+        private auth: AuthService
+    ) {
         // Whenever the Angular route has an event, dispatch an event with the new
         // route data.
         this.sub = this.router.events.subscribe(event => {
@@ -112,12 +117,22 @@ export class AppComponent implements OnInit, OnDestroy {
         // Load up the session state when we load the page
         this.store.dispatch(loadSessionState());
 
+        this.auth.authenticate(window.location.search).subscribe(token => {
+            if (token) {
+                this.auth.token = token;
+            } else {
+                // TED TODO: When you refactor the rest of the GH auth, add a notification here
+            }
+        });
+
         // Request an auth token from GitHub. This doesn't do anything if the
         // "code" and "state" query parameters are not present.
         this.store.dispatch(requestGitHubAuthToken(
             window.location.search,
             this.store.getState().gitHub.authState
         ));
+
+
 
         // When the page loads attempt to authenticate with GitHub. If there
         // is no token stored in session storage, this won't do anything.

@@ -42,6 +42,8 @@
     "@angular/platform-browser": "^4.3.4",
     "@angular/platform-browser-dynamic": "^4.3.4",
     "@angular/router": "^4.3.4",
+    "@ngrx/effects": "^4.0.5",
+    "@ngrx/store": "^4.0.3",
     "ansi_up": "^1.3.0",
     "blueimp-md5": "^2.7.0",
     "bourbon": "^4.2.6",

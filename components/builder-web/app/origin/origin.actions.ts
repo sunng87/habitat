@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { Action } from "@ngrx/store";
 import { addNotification, SUCCESS, DANGER } from "../actions/notifications";
 import { requestRoute } from "../actions/router";
 import * as depotApi from "../depotApi";
@@ -20,6 +21,7 @@ import { parseKey } from "../util";
 import {
     fetchIntegrations
 } from "./origin-page/origin-integrations-tab/origin-integrations-tab.actions";
+import { Origin } from "./origin.model";
 
 export const POPULATE_MY_ORIGINS = "POPULATE_MY_ORIGINS";
 export const POPULATE_ORIGIN_INVITATIONS = "POPULATE_ORIGIN_INVITATIONS";
@@ -35,111 +37,36 @@ export const TOGGLE_ORIGIN_PICKER = "TOGGLE_ORIGIN_PICKER";
 export const SET_PACKAGE_COUNT_FOR_ORIGIN = "SET_PACKAGE_COUNT_FOR_ORIGIN";
 export const SET_ORIGIN_PRIVACY_SETTINGS = "SET_ORIGIN_PRIVACY_SETTINGS";
 
-export function fetchMyOrigins(token) {
-    return dispatch => {
-        new BuilderApiClient(token).getMyOrigins().then(origins => {
-            dispatch(populateMyOrigins(origins));
-            dispatch(fetchOriginsPackageCount(origins));
-        }).catch(error => dispatch(populateMyOrigins(undefined, error)));
-    };
+export class ToggleOriginPicker implements Action {
+    readonly type = TOGGLE_ORIGIN_PICKER;
 }
 
-export function fetchOrigin(originName: string) {
-    return dispatch => {
-        dispatch(setCurrentOriginLoading(true));
-        new BuilderApiClient().getOrigin(originName).then(response => {
-            dispatch(setCurrentOrigin(response));
-        }).catch(error => {
-            dispatch(setCurrentOrigin(undefined, error));
-        });
-    };
+export class PopulatePackageCountForOrigin implements Action {
+    readonly type = SET_PACKAGE_COUNT_FOR_ORIGIN;
+    constructor(public payload: number) {}
 }
 
-export function fetchOriginInvitations(originName: string, token: string) {
-    return dispatch => {
-        new BuilderApiClient(token).getOriginInvitations(originName).
-            then(response => {
-                dispatch(populateOriginInvitations(response));
-            }).catch(error => {
-                dispatch(populateOriginInvitations(undefined, error));
-            });
-    };
+export class PopulateMyOrigins implements Action {
+    readonly type = POPULATE_MY_ORIGINS;
+    constructor(public payload: Origin[], public error: string) {}
 }
 
-export function addDockerHubCredentials(credentials, origin: string, token: string) {
-    return dispatch => {
-        new BuilderApiClient(token).addDockerHubCredentials(origin, credentials).
-            then(response => {
-                dispatch(fetchIntegrations(origin, token));
-            }).catch(error => {
-                dispatch(setOriginIntegrationSaveErrorMessage(error.message));
-            });
-    };
+export class PopulateOriginInvitations implements Action {
+    readonly type = POPULATE_ORIGIN_INVITATIONS;
+    constructor(public payload: Origin[], public error: string) {}
 }
 
-function fetchOriginsPackageCount(origins) {
-    return dispatch => {
-        origins.forEach(origin => {
-            depotApi
-                .getStats(origin)
-                .then(response => {
-                    response["origin"] = origin;
-                    dispatch(populatePackageCountForOrigin(response));
-                })
-                .catch(error => {
-                    dispatch(populatePackageCountForOrigin(error.message));
-                });
-        });
-    };
+export class SetCurrentOrigin implements Action {
+    readonly type = SET_CURRENT_ORIGIN;
+    constructor(public payload: Origin[], public error: string) {}
 }
 
-export function toggleOriginPicker() {
-    return {
-        type: TOGGLE_ORIGIN_PICKER,
-    };
+export class SetCurrentOriginLoading implements Action {
+    readonly type = SET_CURRENT_ORIGIN_LOADING;
+    constructor(public payload: Origin[]) {}
 }
 
-function populatePackageCountForOrigin(payload) {
-    return {
-        type: SET_PACKAGE_COUNT_FOR_ORIGIN,
-        payload
-    };
-}
-
-function populateMyOrigins(payload, error = undefined) {
-    return {
-        type: POPULATE_MY_ORIGINS,
-        payload,
-        error
-    };
-}
-
-function populateOriginInvitations(payload, error = undefined) {
-    return {
-        type: POPULATE_ORIGIN_INVITATIONS,
-        payload,
-        error,
-    };
-}
-
-export function setCurrentOrigin(payload, error = undefined) {
-    return {
-        type: SET_CURRENT_ORIGIN,
-        payload,
-        error,
-    };
-}
-
-function setCurrentOriginLoading(payload: boolean) {
-    return {
-        type: SET_CURRENT_ORIGIN_LOADING,
-        payload,
-    };
-}
-
-function setOriginIntegrationSaveErrorMessage(payload: string) {
-    return {
-        type: SET_ORIGIN_INTEGRATION_SAVE_ERROR_MESSAGE,
-        payload,
-    };
+export class SetOriginIntegrationSaveErrorMessage implements Action {
+    readonly type = SET_ORIGIN_INTEGRATION_SAVE_ERROR_MESSAGE;
+    constructor(public payload: Origin[]) {}
 }
