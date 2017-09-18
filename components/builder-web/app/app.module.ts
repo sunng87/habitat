@@ -39,6 +39,7 @@ import { SideNavComponent } from "./side-nav/SideNavComponent";
 import { SignInPageComponent } from "./sign-in-page/sign-in-page.component";
 import { UserNavComponent } from "./header/user-nav/UserNavComponent";
 import { RepoFilterPipe } from "./pipes/repoFilter.pipe";
+import { AuthService } from "./auth.service";
 
 import { OriginModule } from "./origin/origin.module";
 import { PackageModule } from "./package/package.module";
@@ -79,6 +80,7 @@ import { SharedModule } from "./shared/shared.module";
         RepoFilterPipe
     ],
     providers: [
+        AuthService,
         { provide: LocationStrategy, useClass: HashLocationStrategy, },
         { provide: MD_PLACEHOLDER_GLOBAL_OPTIONS, useValue: {float: "always"}},
         AppStore,

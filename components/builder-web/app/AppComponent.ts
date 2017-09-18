@@ -119,6 +119,7 @@ export class AppComponent implements OnInit, OnDestroy {
 
         this.auth.authenticate(window.location.search).subscribe(token => {
             if (token) {
+                console.log(token);
                 this.auth.token = token;
             } else {
                 // TED TODO: When you refactor the rest of the GH auth, add a notification here

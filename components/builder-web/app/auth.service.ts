@@ -23,6 +23,7 @@ export class AuthService {
 
   public authenticate(params): Observable<string> {
       params = new URLSearchParams(params.slice(1));
+      console.log(config["habitat_api_url"]);
       return this.http.get(`${this.gitHubTokenAuthUrl}/${params.get("code")}`)
         .map(res => res.json().token);
   }

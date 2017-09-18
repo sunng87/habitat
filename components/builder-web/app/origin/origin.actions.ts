@@ -13,17 +13,11 @@
 // limitations under the License.
 
 import { Action } from "@ngrx/store";
-import { addNotification, SUCCESS, DANGER } from "../actions/notifications";
-import { requestRoute } from "../actions/router";
-import * as depotApi from "../depotApi";
-import { BuilderApiClient } from "../BuilderApiClient";
-import { parseKey } from "../util";
-import {
-    fetchIntegrations
-} from "./origin-page/origin-integrations-tab/origin-integrations-tab.actions";
 import { Origin } from "./origin.model";
 
-export const POPULATE_MY_ORIGINS = "POPULATE_MY_ORIGINS";
+export const LOAD_ORIGINS = "LOAD_ORIGINS";
+export const LOAD_ORIGINS_FAILURE = "LOAD_ORIGINS_FAILURE";
+export const LOAD_ORIGINS_SUCCESS = "POPULATE_MY_ORIGINS";
 export const POPULATE_ORIGIN_INVITATIONS = "POPULATE_ORIGIN_INVITATIONS";
 export const SET_CURRENT_ORIGIN = "SET_CURRENT_ORIGIN";
 export const SET_CURRENT_ORIGIN_LOADING = "SET_CURRENT_ORIGIN_LOADING";
@@ -41,14 +35,23 @@ export class ToggleOriginPicker implements Action {
     readonly type = TOGGLE_ORIGIN_PICKER;
 }
 
-export class PopulatePackageCountForOrigin implements Action {
-    readonly type = SET_PACKAGE_COUNT_FOR_ORIGIN;
-    constructor(public payload: number) {}
+export class LoadOrigins implements Action {
+    readonly type = LOAD_ORIGINS;
 }
 
-export class PopulateMyOrigins implements Action {
-    readonly type = POPULATE_MY_ORIGINS;
-    constructor(public payload: Origin[], public error: string) {}
+export class LoadOriginsSuccess implements Action {
+    readonly type = LOAD_ORIGINS_SUCCESS;
+    constructor(public payload: Origin[]) {}
+}
+
+export class LoadOriginsFailure implements Action {
+    readonly type = LOAD_ORIGINS_FAILURE;
+    constructor(public payload: any) {}
+}
+
+export class PopulatePackageCountForOrigin implements Action {
+    readonly type = SET_PACKAGE_COUNT_FOR_ORIGIN;
+    constructor(public payload: string) {}
 }
 
 export class PopulateOriginInvitations implements Action {
@@ -70,3 +73,5 @@ export class SetOriginIntegrationSaveErrorMessage implements Action {
     readonly type = SET_ORIGIN_INTEGRATION_SAVE_ERROR_MESSAGE;
     constructor(public payload: Origin[]) {}
 }
+
+export type Actions = LoadOrigins | LoadOriginsSuccess | LoadOriginsFailure;

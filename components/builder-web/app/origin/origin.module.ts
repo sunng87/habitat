@@ -17,11 +17,16 @@ import { CommonModule } from "@angular/common";
 import { RouterModule } from "@angular/router";
 import { MdButtonModule } from "@angular/material";
 import { FormsModule, ReactiveFormsModule } from "@angular/forms";
+import { EffectsModule } from "@ngrx/effects";
+import { StoreModule } from "@ngrx/store";
 import { SharedModule } from "../shared/shared.module";
-import { OriginPageModule } from "./origin-page/origin-page.module";
+// import { OriginPageModule } from "./origin-page/origin-page.module";
 import { OriginRoutingModule } from "./origin-routing.module";
 import { OriginsPageComponent } from "./origins-page/origins-page.component";
-import { OriginCreatePageComponent } from "./origin-create-page/origin-create-page.component";
+// import { OriginCreatePageComponent } from "./origin-create-page/origin-create-page.component";
+import { OriginEffects } from "./origin.effects";
+import { origins } from "./origin.reducers";
+import { OriginService } from "./origin.service";
 
 // This is so we can test that the ordering of the modules is correct.
 // Ordering matters in this case because we have a static route 'create'
@@ -31,18 +36,24 @@ export const imports = [
   FormsModule,
   MdButtonModule,
   OriginRoutingModule,
-  OriginPageModule,
+  // OriginPageModule,
   ReactiveFormsModule,
-  SharedModule
+  SharedModule,
+  StoreModule.forRoot({ origins }),
+  EffectsModule.forRoot([]),
+  EffectsModule.forFeature([OriginEffects])
 ];
 
 export const declarations = [
   OriginsPageComponent,
-  OriginCreatePageComponent
+  // OriginCreatePageComponent
 ];
 
 @NgModule({
   imports,
-  declarations
+  declarations,
+  providers: [
+    OriginService
+  ]
 })
 export class OriginModule {}

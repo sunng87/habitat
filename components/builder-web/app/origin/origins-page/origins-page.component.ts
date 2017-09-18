@@ -14,47 +14,57 @@
 
 import { Component, OnInit } from "@angular/core";
 import { Router } from "@angular/router";
+import { Store } from "@ngrx/store";
 
-import { fetchMyOrigins } from "../origin.actions";
 import {
     acceptOriginInvitation,
     fetchMyOriginInvitations
 } from "./origins-page.actions";
 import { AppStore } from "../../AppStore";
 import { requireSignIn } from "../../util";
+import * as fromOrigins from "../origin.reducers";
+import * as origin from "../origin.actions";
+import { Origin } from "../origin.model";
+import { Observable } from "rxjs/Observable";
+
 
 @Component({
     template: require("./origins-page.component.html")
 })
 
 export class OriginsPageComponent implements OnInit {
-    constructor(private store: AppStore, private router: Router) { }
+    origins: Observable<Origin[]>;
 
-    get invitations() { return this.store.getState().origins.myInvitations; }
-
-    get origins() { return this.store.getState().origins.mine; }
-
-    get ui() { return this.store.getState().origins.ui.mine; }
-
-    routeToOrigin(origin) {
-        this.router.navigate(["/origins", origin]);
+    constructor(private store: Store<fromOrigins.State>, private router: Router) {
+        this.origins = store.select(fromOrigins.getOriginCollection);
     }
 
-    acceptInvitation(invitationId, originName) {
-        this.store.dispatch(acceptOriginInvitation(
-          invitationId,
-          originName,
-            this.store.getState().gitHub.authToken
-        ));
-    }
+    // get invitations() { return this.store.getState().origins.myInvitations; }
+
+    // get origins() { return this.store.getState().origins.mine; }
+
+    // get ui() { return this.store.getState().origins.ui.mine; }
+
+    // routeToOrigin(origin) {
+    //     this.router.navigate(["/origins", origin]);
+    // }
+
+    // acceptInvitation(invitationId, originName) {
+    //     this.store.dispatch(acceptOriginInvitation(
+    //       invitationId,
+    //       originName,
+    //         this.store.getState().gitHub.authToken
+    //     ));
+    // }
 
     public ngOnInit() {
-        requireSignIn(this);
-        this.store.dispatch(fetchMyOrigins(
-            this.store.getState().gitHub.authToken
-        ));
-        this.store.dispatch(fetchMyOriginInvitations(
-            this.store.getState().gitHub.authToken
-        ));
+        // requireSignIn(this);
+        this.store.dispatch(new origin.LoadOrigins());
+        // this.store.dispatch(fetchMyOrigins(
+        //     this.store.getState().gitHub.authToken
+        // ));
+        // this.store.dispatch(fetchMyOriginInvitations(
+        //     this.store.getState().gitHub.authToken
+        // ));
     }
 }
