@@ -14,6 +14,8 @@
 
 mod handlers;
 
+use std::path::PathBuf;
+
 use hab_net::app::prelude::*;
 use hab_net::oauth::github::GitHubClient;
 use protocol::sessionsrv::*;
@@ -27,6 +29,7 @@ lazy_static! {
         let mut map = DispatchTable::new();
         map.register(AccountGet::descriptor_static(None), handlers::account_get);
         map.register(AccountGetId::descriptor_static(None), handlers::account_get_id);
+        map.register(AccountCreate::descriptor_static(None), handlers::account_create);
         map.register(SessionCreate::descriptor_static(None), handlers::session_create);
         map.register(SessionGet::descriptor_static(None), handlers::session_get);
         map.register(AccountInvitationListRequest::descriptor_static(None),
@@ -48,6 +51,7 @@ pub struct ServerState {
     datastore: DataStore,
     github: Arc<Box<GitHubClient>>,
     permissions: Arc<PermissionsCfg>,
+    key_dir: PathBuf,
 }
 
 impl ServerState {
@@ -56,6 +60,7 @@ impl ServerState {
             datastore: DataStore::new(cfg)?,
             github: Arc::new(Box::new(GitHubClient::new(cfg))),
             permissions: Arc::new(cfg.permissions.clone()),
+            key_dir: cfg.key_dir.clone(),
         })
     }
 }

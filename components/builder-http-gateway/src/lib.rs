@@ -32,6 +32,7 @@ extern crate num_cpus;
 extern crate params;
 extern crate persistent;
 extern crate protobuf;
+extern crate regex;
 extern crate router;
 extern crate serde;
 #[macro_use]

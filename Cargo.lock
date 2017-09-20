@@ -168,6 +168,7 @@ dependencies = [
  "params 0.6.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "persistent 0.3.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "protobuf 1.2.2 (registry+https://github.com/rust-lang/crates.io-index)",
+ "regex 0.1.80 (registry+https://github.com/rust-lang/crates.io-index)",
  "router 0.5.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "serde 1.0.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "serde_derive 1.0.2 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -982,6 +983,7 @@ name = "habitat_builder_sessionsrv"
 version = "0.0.0"
 dependencies = [
  "bitflags 0.8.2 (registry+https://github.com/rust-lang/crates.io-index)",
+ "builder_core 0.0.0",
  "clap 2.25.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "clippy 0.0.144 (registry+https://github.com/rust-lang/crates.io-index)",
  "env_logger 0.4.2 (registry+https://github.com/rust-lang/crates.io-index)",

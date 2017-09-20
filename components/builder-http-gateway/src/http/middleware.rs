@@ -32,7 +32,10 @@ use serde_json;
 use unicase::UniCase;
 
 use super::net_err_to_http;
+use super::helpers;
 use conn::RouteBroker;
+
+header! { (XSessionToken, "X-Session-Token") => [String] }
 
 /// Wrapper around the standard `iron::Chain` to assist in adding middleware on a per-handler basis
 pub struct XHandler(Chain);
@@ -131,7 +134,18 @@ impl Authenticated {
 
     fn authenticate(&self, conn: &mut RouteClient, token: &str) -> IronResult<Session> {
         let mut request = SessionGet::new();
-        request.set_token(token.to_string());
+
+        if helpers::is_github_token(token) {
+            // If we think the incoming token is from GH, don't even bother sending it to the
+            // backend. This will force existing sessions based on the GH token to expire and be
+            // replaced by sessions with our new custom token.
+            //
+            // Plus we have no way of looking up the account id (part of our custom token) at this point anyway.
+            request.set_token("".to_string());
+        } else {
+            request.set_token(token.to_string());
+        }
+
         match conn.route::<SessionGet, Session>(&request) {
             Ok(session) => Ok(session),
             Err(err) => {
@@ -185,6 +199,16 @@ impl BeforeMiddleware for Authenticated {
     }
 }
 
+impl AfterMiddleware for Authenticated {
+    fn after(&self, req: &mut Request, mut res: Response) -> IronResult<Response> {
+        let session = req.extensions.get::<Authenticated>().unwrap();
+        res.headers.set(
+            XSessionToken(session.get_token().to_string()),
+        );
+        Ok(res)
+    }
+}
+
 pub struct Cors;
 
 impl AfterMiddleware for Cors {
@@ -200,6 +224,7 @@ impl AfterMiddleware for Cors {
         Ok(res)
     }
 }
+
 
 pub fn session_create(github: &GitHubClient, token: &str) -> IronResult<Session> {
     if env::var_os("HAB_FUNC_TEST").is_some() {
@@ -239,6 +264,7 @@ pub fn session_create(github: &GitHubClient, token: &str) -> IronResult<Session>
             }
         }
     }
+
     match github.user(&token) {
         Ok(user) => {
             // Select primary email. If no primary email can be found, use any email. If
@@ -260,6 +286,7 @@ pub fn session_create(github: &GitHubClient, token: &str) -> IronResult<Session>
                     return Err(IronError::new(err, (body, status)));
                 }
             };
+
             let mut conn = RouteBroker::connect().unwrap();
             let mut request = SessionCreate::new();
             request.set_token(token.to_string());

@@ -30,6 +30,7 @@ use protocol::originsrv::{CheckOriginAccessRequest, CheckOriginAccessResponse, O
                           OriginPackagePromote};
 use protocol::scheduler::{Group, GroupGet, Project, ProjectState};
 use protocol::sessionsrv::Session;
+use regex::Regex;
 use serde::Serialize;
 use serde_json;
 use urlencoded::UrlEncodedQuery;
@@ -43,6 +44,12 @@ const NO_SESSION: u64 = 0;
 
 pub fn builder_session_id() -> u64 {
     return NO_SESSION;
+}
+
+pub fn is_github_token(token: &str) -> bool {
+    // I'm pretty sure GH's auth tokens are just SHA1 hashes
+    let re = Regex::new(r"^[0-9a-f]{40}$").unwrap();
+    re.is_match(token)
 }
 
 pub fn get_authenticated_session(req: &mut Request) -> Option<Session> {

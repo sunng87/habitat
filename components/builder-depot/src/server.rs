@@ -2009,7 +2009,7 @@ where
             XHandler::new(list_packages).before(opt.clone())
         },
         packages_unique: get "/:origin/pkgs" => {
-            XHandler::new(list_unique_packages).before(opt.clone())
+            XHandler::new(list_unique_packages).before(opt.clone()).after(opt.clone())
         },
         packages_pkg: get "/pkgs/:origin/:pkg" => {
             XHandler::new(list_packages).before(opt.clone())

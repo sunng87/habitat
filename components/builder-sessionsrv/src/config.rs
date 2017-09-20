@@ -13,6 +13,7 @@
 // limitations under the License.
 // Configuration for a Habitat SessionSrv service
 
+use std::path::PathBuf;
 use db::config::DataStoreCfg;
 use hab_net::app::config::*;
 use hab_net::config::{GitHubCfg, GitHubOAuth};
@@ -31,6 +32,8 @@ pub struct Config {
     pub shards: Vec<ShardId>,
     /// Number of threads to process queued messages.
     pub worker_threads: usize,
+    /// Filepath to where the builder encryption keys can be found
+    pub key_dir: PathBuf,
 }
 
 impl Default for Config {
@@ -44,6 +47,7 @@ impl Default for Config {
             datastore: datastore,
             github: GitHubCfg::default(),
             permissions: PermissionsCfg::default(),
+            key_dir: PathBuf::from("/hab/svc/hab-depot/files"),
         }
     }
 }
