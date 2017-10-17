@@ -1,0 +1,84 @@
+.docker-export-settings {
+
+  h3 {
+    font-size: rem(12);
+    text-transform: uppercase;
+  }
+
+  .unconfigured {
+    font-style: italic;
+    margin-left: 18px;
+    font-size: rem(13);
+  }
+
+  .integrations {
+    @include row;
+  }
+
+  .fields {
+    @include row;
+    margin-top: 18px;
+
+    label {
+      font-weight: 600;
+      text-transform: none;
+      font-size: rem(12);
+    }
+
+    md-checkbox {
+      display: block;
+    }
+  }
+
+  .toggle {
+    @include row;
+    margin-bottom: 12px;
+
+    md-slide-toggle {
+      @include span-columns(1.5);
+    }
+
+    span {
+      @include span-columns(6);
+      @include omega;
+    }
+  }
+
+  md-radio-group {
+    display: block;
+    border-top: 1px solid $very-light-gray;
+    margin-bottom: 18px;
+
+    md-radio-button {
+      display: block;
+      line-height: rem(40);
+      border-bottom: 1px solid $very-light-gray;
+
+      .mat-radio-container {
+        margin-right: 40px;
+      }
+
+      label {
+        margin-bottom: 2px;
+      }
+
+      hab-icon {
+        margin-right: 12px;
+      }
+
+      span {
+        font-size: rem(12);
+        text-transform: none;
+      }
+    }
+  }
+
+  input[type="text"] {
+    font-family: $monospace-font-family;
+    font-size: rem(12);
+
+    &::placeholder {
+      color: $medium-gray;
+    }
+  }
+}
