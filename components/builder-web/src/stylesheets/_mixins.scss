@@ -1,7 +1,7 @@
-// Sass Mixins
+/* Sass Mixins
 // Shared between Habitat web properties
 
-// Boxes and shadows
+// Boxes and shadows */
 @mixin shadow-float {
   box-shadow: 0 2px 14px 0 $medium-gray-20;
 }
@@ -28,7 +28,7 @@
   transform: translateY(-50%);
 }
 
-// Buttons
+/* Buttons */
 @mixin hab-button ($color1: $hab-green, $color2: $hab-green-dark, $textcolor: $hab-white) {
   background-color: $color1;
   background-image: linear-gradient(to left, lighten($color1, 5%), lighten($color2, 3%) 100%);
@@ -65,18 +65,18 @@
 }
 
 
-// ------------------------------------------------------------
+/* ------------------------------------------------------------
 // Omega Reset (http://www.joshfry.me/blog/2013/05/13/omega-reset-for-bourbon-neat)
-// ------------------------------------------------------------
+// ------------------------------------------------------------ */
 
 @mixin omega-reset($nth, $columns: 12) {
   &:nth-child(#{$nth}) { margin-right: flex-gutter($columns); }
   &:nth-child(#{$nth}+1) { clear: none; }
 }
 
-// ------------------------------------------------------------
+/* ------------------------------------------------------------
 // Social links
-// ------------------------------------------------------------
+// ------------------------------------------------------------ */
 
 %social-icons {
   .social {

@@ -1,7 +1,7 @@
-// https://material.angular.io/guide/theming
-// https://material.io/guidelines/style/color.html#color-color-palette
+/* https://material.angular.io/guide/theming
+// https://material.io/guidelines/style/color.html#color-color-palette */
 
-@import "@angular/material/theming";
+@import "~@angular/material/theming";
 @import "theme_palette";
 
 $custom-typography: mat-typography-config(

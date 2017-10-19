@@ -3,6 +3,7 @@ const path = require('path');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const ProgressPlugin = require('webpack/lib/ProgressPlugin');
 const CircularDependencyPlugin = require('circular-dependency-plugin');
+const ExtractTextPlugin = require('extract-text-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const autoprefixer = require('autoprefixer');
 const postcssUrl = require('postcss-url');
@@ -86,7 +87,7 @@ module.exports = {
       "./src/polyfills.ts"
     ],
     "styles": [
-      "./src/styles.css"
+      "./src/styles.scss"
     ]
   },
   "output": {
@@ -116,233 +117,32 @@ module.exports = {
         "test": /\.(jpg|png|webp|gif|otf|ttf|woff|woff2|ani)$/,
         "loader": "url-loader?name=[name].[hash:20].[ext]&limit=10000"
       },
-      {
-        "exclude": [
-          path.join(process.cwd(), "src/styles.css")
-        ],
+      { // regular css files
         "test": /\.css$/,
-        "use": [
-          "exports-loader?module.exports.toString()",
-          {
-            "loader": "css-loader",
-            "options": {
-              "sourceMap": false,
-              "importLoaders": 1
-            }
-          },
-          {
-            "loader": "postcss-loader",
-            "options": {
-              "ident": "postcss",
-              "plugins": postcssPlugins
-            }
-          }
-        ]
+        use: ExtractTextPlugin.extract({
+          fallback: 'style-loader',
+          use: ['css-loader']
+        })
       },
-      {
-        "exclude": [
-          path.join(process.cwd(), "src/styles.css")
-        ],
-        "test": /\.scss$|\.sass$/,
-        "use": [
-          "exports-loader?module.exports.toString()",
+      { // sass / scss loader for webpack
+        "test": /\.(sass|scss)$/,
+        use: ExtractTextPlugin.extract({
+          fallback: 'style-loader',
+          use: ['css-loader',
           {
-            "loader": "css-loader",
-            "options": {
-              "sourceMap": false,
-              "importLoaders": 1
-            }
-          },
-          {
-            "loader": "postcss-loader",
-            "options": {
-              "ident": "postcss",
-              "plugins": postcssPlugins
-            }
-          },
-          {
-            "loader": "sass-loader",
+            "loader":'sass-loader',
             "options": {
               "sourceMap": false,
               "precision": 8,
-              "includePaths": []
+              "includePaths": [
+                require("bourbon").includePaths,
+                require("bourbon-neat").includePaths,
+                require("@angular/material").includePaths
+                // require("normalize-scss").includePaths
+              ]
             }
-          }
-        ]
-      },
-      {
-        "exclude": [
-          path.join(process.cwd(), "src/styles.css")
-        ],
-        "test": /\.less$/,
-        "use": [
-          "exports-loader?module.exports.toString()",
-          {
-            "loader": "css-loader",
-            "options": {
-              "sourceMap": false,
-              "importLoaders": 1
-            }
-          },
-          {
-            "loader": "postcss-loader",
-            "options": {
-              "ident": "postcss",
-              "plugins": postcssPlugins
-            }
-          },
-          {
-            "loader": "less-loader",
-            "options": {
-              "sourceMap": false,
-              "paths": []
-            }
-          }
-        ]
-      },
-      {
-        "exclude": [
-          path.join(process.cwd(), "src/styles.css")
-        ],
-        "test": /\.styl$/,
-        "use": [
-          "exports-loader?module.exports.toString()",
-          {
-            "loader": "css-loader",
-            "options": {
-              "sourceMap": false,
-              "importLoaders": 1
-            }
-          },
-          {
-            "loader": "postcss-loader",
-            "options": {
-              "ident": "postcss",
-              "plugins": postcssPlugins
-            }
-          },
-          {
-            "loader": "stylus-loader",
-            "options": {
-              "sourceMap": false,
-              "paths": []
-            }
-          }
-        ]
-      },
-      {
-        "include": [
-          path.join(process.cwd(), "src/styles.css")
-        ],
-        "test": /\.css$/,
-        "use": [
-          "style-loader",
-          {
-            "loader": "css-loader",
-            "options": {
-              "sourceMap": false,
-              "importLoaders": 1
-            }
-          },
-          {
-            "loader": "postcss-loader",
-            "options": {
-              "ident": "postcss",
-              "plugins": postcssPlugins
-            }
-          }
-        ]
-      },
-      {
-        "include": [
-          path.join(process.cwd(), "src/styles.css")
-        ],
-        "test": /\.scss$|\.sass$/,
-        "use": [
-          "style-loader",
-          {
-            "loader": "css-loader",
-            "options": {
-              "sourceMap": false,
-              "importLoaders": 1
-            }
-          },
-          {
-            "loader": "postcss-loader",
-            "options": {
-              "ident": "postcss",
-              "plugins": postcssPlugins
-            }
-          },
-          {
-            "loader": "sass-loader",
-            "options": {
-              "sourceMap": false,
-              "precision": 8,
-              "includePaths": []
-            }
-          }
-        ]
-      },
-      {
-        "include": [
-          path.join(process.cwd(), "src/styles.css")
-        ],
-        "test": /\.less$/,
-        "use": [
-          "style-loader",
-          {
-            "loader": "css-loader",
-            "options": {
-              "sourceMap": false,
-              "importLoaders": 1
-            }
-          },
-          {
-            "loader": "postcss-loader",
-            "options": {
-              "ident": "postcss",
-              "plugins": postcssPlugins
-            }
-          },
-          {
-            "loader": "less-loader",
-            "options": {
-              "sourceMap": false,
-              "paths": []
-            }
-          }
-        ]
-      },
-      {
-        "include": [
-          path.join(process.cwd(), "src/styles.css")
-        ],
-        "test": /\.styl$/,
-        "use": [
-          "style-loader",
-          {
-            "loader": "css-loader",
-            "options": {
-              "sourceMap": false,
-              "importLoaders": 1
-            }
-          },
-          {
-            "loader": "postcss-loader",
-            "options": {
-              "ident": "postcss",
-              "plugins": postcssPlugins
-            }
-          },
-          {
-            "loader": "stylus-loader",
-            "options": {
-              "sourceMap": false,
-              "paths": []
-            }
-          }
-        ]
+          }]
+        })
       },
       {
         "test": /\.ts$/,
@@ -351,11 +151,15 @@ module.exports = {
     ]
   },
   "plugins": [
+    new ExtractTextPlugin({ // define where to save the file
+      filename: 'style.bundle.css',
+      allChunks: true,
+    }),
     new DashboardPlugin(),
     new NoEmitOnErrorsPlugin(),
     new CopyWebpackPlugin([
       {
-        "context": "/Users/gamini/dev/tmp/monster/src/",
+        "context": "./src/",
         "to": "",
         "from": {
           "glob": "assets/**/*",
@@ -363,12 +167,12 @@ module.exports = {
         }
       },
       {
-        "context": "/Users/gamini/dev/tmp/monster/src/",
+        "context": "./src/",
         "to": "",
         "from": {
           "glob": "favicon.ico",
           "dot": true
-        }
+        },
       }
     ], {
       "ignore": [
@@ -377,10 +181,6 @@ module.exports = {
       "debug": "warning"
     }),
     new ProgressPlugin(),
-    new CircularDependencyPlugin({
-      "exclude": /(\\|\/)node_modules(\\|\/)/,
-      "failOnError": false
-    }),
     new NamedLazyChunksWebpackPlugin(),
     new HtmlWebpackPlugin({
       "template": "./src/index.html",
