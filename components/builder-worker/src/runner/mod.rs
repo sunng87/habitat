@@ -77,6 +77,7 @@ pub struct Runner {
     config: Arc<Config>,
     depot_cli: depot_client::Client,
     workspace: Workspace,
+    archive: Option<PackageArchive>,
     logger: Logger,
     cancel: Arc<AtomicBool>,
 }
@@ -92,6 +93,7 @@ impl Runner {
 
         Runner {
             workspace: Workspace::new(&config.data_path, job),
+            archive: None,
             config: config,
             depot_cli: depot_cli,
             logger: logger,
@@ -107,11 +109,25 @@ impl Runner {
         &mut self.workspace.job
     }
 
-    pub fn is_canceled(&mut self) -> bool {
+    fn is_canceled(&mut self) -> bool {
         self.cancel.load(Ordering::SeqCst)
     }
 
-    pub fn run(mut self, tx: mpsc::Sender<Job>) {
+    fn check_cancel(&mut self, tx: &mpsc::Sender<Job>) -> Result<()> {
+        if self.is_canceled() {
+            println!("**** CANCEL SEEN BY RUNNER");
+            self.cancel();
+            self.cleanup();
+            tx.send(self.workspace.job).map_err(Error::Mpsc)?;
+            return Err(Error::JobCanceled);
+        }
+
+        Ok(())
+    }
+
+    fn do_validate(&mut self, tx: &mpsc::Sender<Job>) -> Result<()> {
+        self.check_cancel(tx)?;
+
         if let Some(err) = util::validate_integrations(&self.workspace).err() {
             let msg = format!(
                 "Failed to validate integrations for {}, err={:?}",
@@ -120,12 +136,18 @@ impl Runner {
             );
             debug!("{}", msg);
             self.logger.log(&msg);
-            let job = self.fail(net::err(ErrCode::INVALID_INTEGRATIONS, "wk:run:7"));
-            if tx.send(job).is_err() {
-                warn!("Failed to send job");
-            }
-            return;
+
+            self.fail(net::err(ErrCode::INVALID_INTEGRATIONS, "wk:run:7"));
+            tx.send(self.workspace.job).map_err(Error::Mpsc)?;
+            return Err(err);
         };
+
+        Ok(())
+    }
+
+    fn do_setup(&mut self, tx: &mpsc::Sender<Job>) -> Result<()> {
+        self.check_cancel(tx)?;
+
         if let Some(err) = self.setup().err() {
             let msg = format!(
                 "Failed to setup workspace for {}, err={:?}",
@@ -134,12 +156,18 @@ impl Runner {
             );
             warn!("{}", msg);
             self.logger.log(&msg);
-            let job = self.fail(net::err(ErrCode::WORKSPACE_SETUP, "wk:run:1"));
-            if tx.send(job).is_err() {
-                warn!("Failed to send job");
-            }
-            return;
+
+            self.fail(net::err(ErrCode::WORKSPACE_SETUP, "wk:run:1"));
+            tx.send(self.workspace.job).map_err(Error::Mpsc)?;
+            return Err(err);
         }
+
+        Ok(())
+    }
+
+    fn do_install_key(&mut self, tx: &mpsc::Sender<Job>) -> Result<()> {
+        self.check_cancel(tx)?;
+
         if let Some(err) = self.install_origin_secret_key().err() {
             let msg = format!(
                 "Failed to install origin secret key {}, err={:?}",
@@ -148,12 +176,17 @@ impl Runner {
             );
             debug!("{}", msg);
             self.logger.log(&msg);
-            let job = self.fail(net::err(ErrCode::SECRET_KEY_FETCH, "wk:run:3"));
-            if tx.send(job).is_err() {
-                warn!("Failed to send job");
-            }
-            return;
+            self.fail(net::err(ErrCode::SECRET_KEY_FETCH, "wk:run:3"));
+            tx.send(self.workspace.job).map_err(Error::Mpsc)?;
+            return Err(err);
         }
+
+        Ok(())
+    }
+
+    fn do_clone(&mut self, tx: &mpsc::Sender<Job>) -> Result<()> {
+        self.check_cancel(tx)?;
+
         let vcs = VCS::from_job(&self.job(), self.config.github.clone());
         if let Some(err) = vcs.clone(&self.workspace.src()).err() {
             let msg = format!(
@@ -163,12 +196,16 @@ impl Runner {
             );
             debug!("{}", msg);
             self.logger.log(&msg);
-            let job = self.fail(net::err(ErrCode::VCS_CLONE, "wk:run:4"));
-            if tx.send(job).is_err() {
-                warn!("Failed to send job");
-            }
-            return;
+            self.fail(net::err(ErrCode::VCS_CLONE, "wk:run:4"));
+            tx.send(self.workspace.job).map_err(Error::Mpsc)?;
+            return Err(err);
         }
+
+        Ok(())
+    }
+
+    fn do_build(&mut self, tx: &mpsc::Sender<Job>) -> Result<()> {
+        self.check_cancel(tx)?;
 
         self.workspace.job.set_build_started_at(
             UTC::now().to_rfc3339(),
@@ -198,41 +235,40 @@ impl Runner {
                 );
                 debug!("{}", msg);
                 self.logger.log(&msg);
-                let job = self.fail(net::err(ErrCode::BUILD, "wk:run:5"));
-                if tx.send(job).is_err() {
-                    warn!("Failed to send job");
-                }
-                return;
+                self.fail(net::err(ErrCode::BUILD, "wk:run:5"));
+                tx.send(self.workspace.job).map_err(Error::Mpsc)?;
+                return Err(err);
             }
         };
 
         // Converting from a core::PackageIdent to an OriginPackageIdent
         let ident = OriginPackageIdent::from(archive.ident().unwrap());
         self.workspace.job.set_package_ident(ident);
+        self.archive = Some(archive);
 
-        if self.is_canceled() {
-            println!("**** CANCEL SEEN BY RUNNER");
-            let job = self.cancel();
-            if tx.send(job).is_err() {
-                warn!("Failed to send job");
-            }
-            return;
-        }
+        Ok(())
+    }
 
-        if !post_process(
-            &mut archive,
-            &self.workspace,
-            &self.config,
-            &mut self.logger,
-        )
+    fn do_postprocess(&mut self, tx: &mpsc::Sender<Job>) -> Result<()> {
+        self.check_cancel(tx)?;
+
+        if self.archive.is_some() &&
+            !post_process(
+                &mut self.archive.unwrap(),
+                &self.workspace,
+                &self.config,
+                &mut self.logger,
+            )
         {
-            let job = self.fail(net::err(ErrCode::POST_PROCESSOR, "wk:run:6"));
-            if tx.send(job).is_err() {
-                warn!("Failed to send job");
-            }
-            return;
+            self.fail(net::err(ErrCode::POST_PROCESSOR, "wk:run:6"));
+            tx.send(self.workspace.job).map_err(Error::Mpsc)?;
+            return Err(err);
         }
 
+        Ok(())
+    }
+
+    fn cleanup(&mut self) -> Result<()> {
         if let Some(err) = fs::remove_dir_all(self.workspace.out()).err() {
             warn!(
                 "Failed to delete directory during cleanup, dir={}, err={:?}",
@@ -241,10 +277,23 @@ impl Runner {
             )
         }
         self.teardown().err().map(|e| error!("{}", e));
-        let job = self.complete();
-        if tx.send(job).is_err() {
-            warn!("Failed to send job");
-        }
+
+        Ok(())
+    }
+
+    pub fn run(mut self, tx: mpsc::Sender<Job>) -> Result<()> {
+        self.do_validate(&tx)?;
+        self.do_setup(&tx)?;
+        self.do_install_key(&tx)?;
+        self.do_clone(&tx)?;
+        self.do_build(&tx)?;
+        self.do_postprocess(&tx)?;
+
+        self.cleanup(&tx)?;
+        self.complete();
+        tx.send(self.workspace.job).map_err(Error::Mpsc)?;
+
+        Ok(())
     }
 
     fn install_origin_secret_key(&mut self) -> Result<()> {
@@ -322,24 +371,23 @@ impl Runner {
         }
     }
 
-    fn cancel(mut self) -> Job {
+    fn cancel(&mut self) -> Job {
         self.workspace.job.set_state(JobState::CancelComplete);
         self.logger.log_worker_job(&self.workspace.job);
         self.workspace.job
     }
 
-    fn complete(mut self) -> Job {
+    fn complete(&mut self) -> Job {
         self.workspace.job.set_state(JobState::Complete);
         self.logger.log_worker_job(&self.workspace.job);
         self.workspace.job
     }
 
-    fn fail(mut self, err: net::NetError) -> Job {
+    fn fail(&mut self, err: net::NetError) {
         self.teardown().err().map(|e| error!("{}", e));
         self.workspace.job.set_state(JobState::Failed);
         self.workspace.job.set_error(err);
         self.logger.log_worker_job(&self.workspace.job);
-        self.workspace.job
     }
 
     fn setup(&mut self) -> Result<()> {
@@ -380,6 +428,7 @@ impl Runner {
             }
             Ok(())
         } else {
+            // TODO: Should we really fail build if teardown fails/
             Err(Error::BuildFailure(exit_status.code().unwrap_or(-1)))
         }
 
